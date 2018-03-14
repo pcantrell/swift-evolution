@@ -145,6 +145,49 @@ let existing = childViewControllers as? Array<TableRowViewController>
 
 This pattern extends to any type-erased or superclass where a cast will always be valid.
 
+## Examples of Real-World Use
+
+Here are a variety of examples that demonstrate the `!!` operator in real-world use:
+
+```swift
+// In a right-click gesture recognizer action handler
+let event = NSApp.currentEvent !! "Trying to get current event for right click, but there's no event"
+
+// In a custom view controller subclass that only 
+// accepts children of a certain kind:
+let existing = childViewControllers as? Array<TableRowViewController> !! "TableViewController must only have TableRowViewControllers as children"
+
+// Providing a value based on an initializer that returns an optional:
+lazy var sectionURL: URL = {
+    return URL(string: “myapp://section/\(identifier)")
+        !! "can't create URL for section \(identifier)"
+}()
+
+// Retrieving an image from an embedded framework:
+private static let addImage: NSImage = {
+    let bundle = Bundle(for: FlagViewController.self)
+    let image = bundle.image(forResource: "add") !! "Missing 'add' image"
+    image.isTemplate = true
+    return image
+}()
+
+// Asserting consistency of an internal model:
+let flag = command.flag(with: flagID) !! "Unable to retrieve non-custom flag for id \(flagID.string)"
+
+// drawRect:
+override draw(_ rect: CGRect) {
+    let context = UIGraphicsGetCurrentContext() !! "`drawRect` context guarantee was breeched"
+}
+```
+
+The `!!` operator generally falls in two groups:
+
+1. Asserting System Framework Correctness: The `NSApp.currentEvent` property returns an `Optional<NSEvent>` as there’s not always a current event going on. It is always safe to assert an actual event in the action handler of a right-click gesture recognizer. If this ever fails, `!!` provides an immediately and clear description of where the system framework has not worked according to expectations.
+
+2. Asserting Application Logic Correctness: The `!!` operator ensures that outlets are properly hooked up and that the internal data model is in a consistent state. The related error messages  explicitly mention specific outlet and data details.
+
+These areas identify when resources haven't been added to the right target, when a URL has been mis-entered, or when a model update has not propagated completely to its supporting use. Incorporating a diagnostic message, provides immediate feedback as to why the code is failing and where.
+
 ## On Forced Unwraps
 
 This proposal _does not_ eliminate or prejudge the `!`operator. Using `!!` should be a positive house standards choice, especially when the use of explanatory text becomes cumbersome.
@@ -267,49 +310,6 @@ By following `Optional.unsafelyUnwrapped`, this approach is consistent with Swif
 Like `assert`, `unsafelyUnwrapped` does not perform a check in optimized builds. The forced unwrap `!` operator does as does `precondition`. The "unwrap or die" `!!` operator should behave like `precondition` and not `assert` to preserve trapping information in optimized builds.
 
 Unfortunately, there is no direct way at this time to emit the `#file` name and `#line` number with the above code. We hope the dev team can somehow work around this limitation to produce that information at the `!!` site.
-
-## Examples of Real-World Use
-
-Here are a variety of examples that demonstrate the `!!` operator in real-world use:
-
-```swift
-// In a right-click gesture recognizer action handler
-let event = NSApp.currentEvent !! "Trying to get current event for right click, but there's no event"
-
-// In a custom view controller subclass that only 
-// accepts children of a certain kind:
-let existing = childViewControllers as? Array<TableRowViewController> !! "TableViewController must only have TableRowViewControllers as children"
-
-// Providing a value based on an initializer that returns an optional:
-lazy var sectionURL: URL = {
-    return URL(string: "myapp://section/\(identifier)")
-        !! "can't create URL for section \(identifier)"
-}()
-
-// Retrieving an image from an embedded framework:
-private static let addImage: NSImage = {
-    let bundle = Bundle(for: FlagViewController.self)
-    let image = bundle.image(forResource: "add") !! "Missing 'add' image"
-    image.isTemplate = true
-    return image
-}()
-
-// Asserting consistency of an internal model:
-let flag = command.flag(with: flagID) !! "Unable to retrieve non-custom flag for id \(flagID.string)"
-
-// drawRect:
-override draw(_ rect: CGRect) {
-    let context = UIGraphicsGetCurrentContext() !! "`drawRect` context guarantee was breeched"
-}
-```
-
-The `!!` operator generally falls in two groups:
-
-1. Asserting System Framework Correctness: The `NSApp.currentEvent` property returns an `Optional<NSEvent>` as there’s not always a current event going on. It is always safe to assert an actual event in the action handler of a right-click gesture recognizer. If this ever fails, `!!` provides an immediately and clear description of where the system framework has not worked according to expectations.
-
-2. Asserting Application Logic Correctness: The `!!` operator ensures that outlets are properly hooked up and that the internal data model is in a consistent state. The related error messages  explicitly mention specific outlet and data details.
-
-These areas identify when resources haven't been added to the right target, when a URL has been mis-entered, or when a model update has not propagated completely to its supporting use. Incorporating a diagnostic message, provides immediate feedback as to why the code is failing and where.
 
 ## The Black Swan Deployment
 
