@@ -9,7 +9,7 @@
 
 This proposal introduces an annotated forced unwrapping operator to the Swift standard library, augmenting the `?`, `??`, and `!` family with `!!`. The "unwrap or die" operator provides text feedback on failed unwraps. It supports self-documentation and safer development. This operator is commonly implemented in the wider Swift Community and should be considered for official adoption.
 
-The "Unwrap or Die" operator introduces a new `!!` operator that benefits both experienced and new Swift users. It takes this form:
+The new "Unwrap or Die" operator, `!!`, benefits both experienced and new Swift users. It takes this form:
 
 ```let value = wrappedValue !! <# "Explanation why lhs cannot be nil." #>```
 
@@ -39,7 +39,7 @@ Adopting this operator:
 
 ## Motivation
 
-"Unwrap or Die" has been widely adopted in the Swift community. This approach provides a best practices approach that establishes informative run-time diagnostics with compiler-checked rationales (the rhs is mandatory). Requiring a string on the rhs rather than relying on comments conveys the reason why the value cannot be nil from source to the console should the underlying guarantee fail at runtime. This produces "better" failures with explicit explanations. If you’re going to write a comment, why not make that comment useful for debugging at the same time?
+"Unwrap or Die" has been widely adopted in the Swift community. This approach provides a best practices approach that establishes informative run-time diagnostics with compiler-checked rationales (the rhs is mandatory). Relying solely on comments only conveys in the source code itself the reason why the developer thinks the value cannot be nil. Requiring a string on the rhs of `!!` provides useful information all the way from source to the console should the underlying guarantee fail at runtime. This produces "better" failures with explicit explanations. If you’re going to write a comment, why not make that comment useful for debugging at the same time?
 
 ### The Naive User / Fixit Problem
 
@@ -54,9 +54,9 @@ let resourceData = try String(contentsOf: url, encoding: .utf8)
 // Fix: Insert '!'
 ```
 
-Experienced developers easily distinguish whether an unwrapped value reflects an overlooked unwrap, in which case they rearchitect to introduce a better pattern, or if the value-in-question is guaranteed to never contain nil. 
+Experienced developers easily distinguish whether an optional value reflects an overlooked error condition, in which case they rearchitect to introduce a better pattern, or if the value in question is guaranteed to never contain nil. 
 
-Inexperienced developers, unless they’re moving from a language with similar constructs, usually will not. They’re focused on getting past a compilation barrier, without realizing the hazard of nil values at the point of use. 
+Inexperienced developers, unless they’re moving from a language with similar constructs, usually will not make such distinctions. They’re focused on getting past a compilation barrier, without realizing the hazard of nil values at the point of use. 
 
 Quincey Morris writes with respect to the `url` example:
 
@@ -92,7 +92,7 @@ guard let url = URL(string: destination) else {
 }
 ```
 
-As Quincey points out, Swift's "Add !" is a syntactic fix not a semantic one. Encourging the unconsidered use of `!` insertion leads to poorly designed code. The `!` fixit should not be used as a bandaid to make things compile. 
+As Quincey points out, Swift's "Add !" is a syntactic fix, not a semantic one. Encourging the unconsidered use of `!` insertion leads to poorly designed code. The `!` fixit should not be used as a bandaid to make things compile. 
 
 Swift encourages users to accept each fix until their program compiles but Swift cannot holistically evaluate user code intent. It cannot recommend or fixit a `guard let` or `if let` alternative at a specific disjoint location. 
 
@@ -281,7 +281,10 @@ let event = NSApp.currentEvent !! "Trying to get current event for right click, 
 let existing = childViewControllers as? Array<TableRowViewController> !! "TableViewController must only have TableRowViewControllers as children"
 
 // Providing a value based on an initializer that returns an optional:
-lazy var emptyURL: URL = { return URL(string: “myapp://section/\(identifier)") !! "can't create basic empty url” }()
+lazy var sectionURL: URL = {
+    return URL(string: “myapp://section/\(identifier)")
+        !! "can't create URL for section \(identifier)”
+}()
 
 // Retrieving an image from an embedded framework:
 private static let addImage: NSImage = {
