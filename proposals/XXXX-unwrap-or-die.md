@@ -196,7 +196,7 @@ let y = x! // reason
 
 Although comments document in-code reasoning, these explanations are not emitted when the application traps on the forced unwrap:
 
-> As the screener of a non-zero number of radars resulting from unwrapped nils, I would certainly appreciate more use of `guard let x = x else { fatalError(“explanation”) }` and hope that `!!` would encourage it.
+> As the screener of a non-zero number of radars resulting from unwrapped nils, I would certainly appreciate more use of `guard let x = x else { fatalError("explanation") }` and hope that `!!` would encourage it.
 
 Sometimes it’s not necessary to explain your use of a forced unwrap. In those cases the normal `!` operator will remain, even after the introduction of `!!`. You can continue using `!`, as before, just as you can leave off the string from a precondition.
 
@@ -274,7 +274,7 @@ Here are a variety of examples that demonstrate the `!!` operator in real-world 
 
 ```swift
 // In a right-click gesture recognizer action handler
-let event = NSApp.currentEvent !! "Trying to get current event for right click, but there's no event”
+let event = NSApp.currentEvent !! "Trying to get current event for right click, but there's no event"
 
 // In a custom view controller subclass that only 
 // accepts children of a certain kind:
@@ -282,8 +282,8 @@ let existing = childViewControllers as? Array<TableRowViewController> !! "TableV
 
 // Providing a value based on an initializer that returns an optional:
 lazy var sectionURL: URL = {
-    return URL(string: “myapp://section/\(identifier)")
-        !! "can't create URL for section \(identifier)”
+    return URL(string: "myapp://section/\(identifier)")
+        !! "can't create URL for section \(identifier)"
 }()
 
 // Retrieving an image from an embedded framework:
