@@ -1,7 +1,7 @@
 # Allow Key Paths to Refer to Unapplied Methods
 
 * Proposal: [SE-NNNN](NNNN-method-keypaths.md)
-* Authors: [Paul Cantrell](https://github.com/pcantrell), [Jeremy Saklad](https://github.com/Saklad5)
+* Authors: [Paul Cantrell](https://github.com/pcantrell), [Jeremy Saklad](https://github.com/Saklad5), [Filip Sakel](https://github.com/filip-sakel)
 * Review Manager: TBD
 * Status: **Awaiting implementation**
 
@@ -36,7 +36,7 @@ Swift-evolution thread: [Why can’t key paths refer to instance methods?](https
 For example, `\String.count` refers to “the `count` property of `String`s in general,” without referencing or being
 attached to any _particular_ `String` value.
 
-In many cases, `foo.___` is thus equivalent to `foo[key path: \.___]`:
+In many cases, `foo.___` is thus equivalent to `foo[keyPath: \.___]`:
 
 ```swift
 let exampleURL = URL(string: "https://swift.org/contributing")!
@@ -123,7 +123,7 @@ However, relying on unbound method references to fill in the gap in key paths le
 
 ## Proposed solution
 
-Allow key paths to reference methods as well as properties:
+Allow key paths to reference methods, in addition to the properties and subscripts they currently support:
 
 ```swift
 struct Foo {
@@ -139,7 +139,7 @@ struct Foo {
 Note that applying the key path does not _call_ the method; rather, it creates an unapplied method reference — a closure
 waiting for arguments.
 
-This fixes the ❌ failure of symmetry above:
+This fixes the ❌ failures of symmetry above:
 
 ```swift
 exampleURL           .deletingLastPathComponent   // Unapplied method…
@@ -186,14 +186,15 @@ stagesAndEntries.prefix(upTo: index)
 
 In general, if and only if `T.m` evaluates to an unbound method of type `(T) -> (A) -> B`, then:
 
-- `\T.m` should evaluate to a key path of type `KeyPath<T, (A) -> B>`, and
-- given `var x: T`, the expression `x[keyPath: \.m]` should be equivalent to the expression `x.m`.
+- `\T.m` will evaluate to a key path of type `KeyPath<T, (A) -> B>`, and
+- given `var x: T`, the expression `x[keyPath: \.m]` will be equivalent to the expression `x.m`.
 
-Note that this specification strives to parallel the existing behavior of unbound methods, and not forge new design
-ground other that extending their capabilities to key paths. In particular, just as with unbound methods:
+Note that this phrasing aims to extend the current behavior of key paths according to existing precedent set by unbound
+methods, and does not seek to make any novel design decisions or solve additional problems beyond that. In particular,
+just as with unbound methods:
 
-- You may optionally provide argument names to disambiguate methods with the same name, and optionally omit argument
-    names if the method reference is unambiguous without them:
+- You may provide argument names to disambiguate methods with the same name, and may omit argument names if the method
+    reference is unambiguous without them:
 
     ```swift
     \Array<String>.reversed            // OK (reversed() has no args)
@@ -272,9 +273,11 @@ Again, **all of the above abilities and limitations** follow from our constraint
 of unbound methods; none of the above is a new design decision unique to this proposal.
 
 These last three limitations — no partial application of arguments, no mutating methods, no type methods — are both ripe
-for proposals of their own, but pose design questions best served by separate discusions. We hope that future proposals
-on these topics will consider unbound methods and key paths together as a unit, and attempt to maintain coherence
-between them as much as reasonably possible.
+for proposals of their own, but pose design questions best served by separate discusions (see Future Directions below),
+and are **out of scope for this proposal**.
+
+Any future proposals on topics such as these should consider both unbound methods and key paths, and attempt to maintain
+coherence between the two as much as reasonably possible.
 
 ---
 
