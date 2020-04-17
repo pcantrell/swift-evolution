@@ -288,9 +288,9 @@ just as with unbound methods:
 Again, **all of the above abilities and limitations** follow from our constraint that method key paths mirror existing
 behavior; none of the above is a new design decision unique to this proposal.
 
-These last three limitations — no partial application of arguments, no mutating methods, no type methods — are both ripe
-for proposals of their own, but pose design questions best served by separate discusions (see Future Directions below),
-and are **out of scope for this proposal**.
+These last three limitations in the list above — no partial application of arguments, no mutating methods, no type
+methods — are all ripe for proposals of their own, but pose design questions best served by separate discusions (see
+Future Directions below), and are **out of scope for this proposal**.
 
 Any future proposals on topics such as these should consider both unbound methods and key paths, and attempt to maintain
 coherence between the two as much as reasonably possible.
