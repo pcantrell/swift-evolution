@@ -36,7 +36,8 @@ Swift-evolution thread: [Why can’t key paths refer to instance methods?](https
 For example, `\String.count` refers to “the `count` property of `String`s in general,” without referencing or being
 attached to any _particular_ `String` value.
 
-In many cases, `foo.___` is thus equivalent to `foo[keyPath: \.___]`:
+A simple symmetry illustrates the nature of key paths: `foo.___.___` (an expression that contains a member access) is
+equivalent to `foo[keyPath: \.___.___]` (the member access split out as a key path, then recombined). For example:
 
 ```swift
 let exampleURL = URL(string: "https://swift.org/contributing")!
@@ -184,7 +185,8 @@ stagesAndEntries.prefix(upTo: index)
 
 ## Detailed design
 
-In general, if and only if `T.m` evaluates to an unbound method of type `(T) -> (A) -> B`, then:
+In general, for a type `T`and a method `m`, if and only if `T.m` evaluates to an unbound method of type
+`(T) -> (A) -> B`, then:
 
 - `\T.m` will evaluate to a key path of type `KeyPath<T, (A) -> B>`, and
 - given `var x: T`, the expression `x[keyPath: \.m]` will be equivalent to the expression `x.m`.
@@ -223,7 +225,7 @@ just as with unbound methods:
     the reference is unambiguous:
 
     ```swift
-    \Array.joined            // OK
+    \Array.joined            // OK because joined is on an extension constrained to Element == String
     \Array.contains          // compile error: ambiguous
     \Array<String>.contains  // OK
     ```
@@ -269,8 +271,8 @@ just as with unbound methods:
     Because the parallel unbound method construct does not exist in Swift today, key paths would not support it either
     (yet) under this proposal.
 
-Again, **all of the above abilities and limitations** follow from our constraint that method key paths mirror the behavior
-of unbound methods; none of the above is a new design decision unique to this proposal.
+Again, **all of the above abilities and limitations** follow from our constraint that method key paths mirror existing
+behavior; none of the above is a new design decision unique to this proposal.
 
 These last three limitations — no partial application of arguments, no mutating methods, no type methods — are both ripe
 for proposals of their own, but pose design questions best served by separate discusions (see Future Directions below),
