@@ -1,7 +1,7 @@
 # Allow Key Paths to Refer to Unapplied Methods
 
-* Proposal: [SE-NNNN](NNNN-method-key paths.md)
-* Authors: [Paul Cantrell](https://github.com/pcantrell)
+* Proposal: [SE-NNNN](NNNN-method-keypaths.md)
+* Authors: [Paul Cantrell](https://github.com/pcantrell), [Jeremy Saklad](https://github.com/Saklad5)
 * Review Manager: TBD
 * Status: **Awaiting implementation**
 
@@ -15,18 +15,18 @@ expressly limited key paths to be able to reference only properties and subscrip
 \Person.pets[0]               // KeyPath<Person, Pet>
 ```
 
-This proposal adds the ability for key paths to reference instance methods, optionally specifying argument names to disambiguate:
+This proposal adds the ability for key paths to reference instance methods, optionally specifying argument names:
 
 ```swift
 \Person.sing                  // KeyPath<Person, () -> Sound>
 \Person.sing(melody:lyrics:)  // KeyPath<Person, (Melody, String) -> Sound>
 ```
 
-Note that these key paths do not provide argument values: they reference _unapplied_ methods, and the value they give is
-a function type rather than the return value thereof.
+Note that these key paths do not provide argument values; they reference _unapplied_ methods, and the value they give is
+a function, not the the value that results from calling the method.
 
-Adding this capability both increases consistency and removes obstacles encountered when implementing
-map/filter operations, proxying with key path member lookup, binding weak method references, and performing other common tasks.
+Adding this capability not only removes an inconsistency in Swift, but solves pratical problems involving map/filter
+operations, proxying with key path member lookup, and binding weak method references.
 
 Swift-evolution thread: [Why can’t key paths refer to instance methods?](https://forums.swift.org/t/why-can-t-key-paths-refer-to-instance-methods/35315)
 
