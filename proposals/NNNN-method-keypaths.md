@@ -26,7 +26,7 @@ Note that these key paths do not provide argument values; they reference _unappl
 a function, not the the value that results from calling the method.
 
 Adding this capability not only removes an inconsistency in Swift, but solves pratical problems involving map/filter
-operations, proxying with key path member lookup, and binding weak method references.
+operations, proxying with key path member lookup, and passing weak method references that do not retain their receiver.
 
 Swift-evolution thread: [Why can’t key paths refer to instance methods?](https://forums.swift.org/t/why-can-t-key-paths-refer-to-instance-methods/35315)
 
