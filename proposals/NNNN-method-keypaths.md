@@ -36,8 +36,9 @@ Swift-evolution thread: [Why can’t key paths refer to instance methods?](https
 For example, `\String.count` refers to “the `count` property of `String`s in general,” without referencing or being
 attached to any _particular_ `String` value.
 
-A simple symmetry illustrates the nature of key paths: `foo.___.___` (an expression that contains a member access) is
-equivalent to `foo[keyPath: \.___.___]` (the member access split out as a key path, then recombined). For example:
+A simple symmetry illustrates the nature of key paths: `foo.___.___` (an expression that contains a member access) is in
+many cases equivalent to `foo[keyPath: \.___.___]` (the member access split out as a key path, then recombined). For
+example:
 
 ```swift
 let exampleURL = URL(string: "https://swift.org/contributing")!
