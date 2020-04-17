@@ -139,7 +139,7 @@ struct Foo {
 Note that applying the key path does not _call_ the method; rather, it creates an unapplied method reference — a closure
 waiting for arguments.
 
-This fixes the ❌ failures of symmetry above:
+This fixes the ❌ inconsistencies above:
 
 ```swift
 exampleURL           .deletingLastPathComponent   // Unapplied method…
@@ -284,10 +284,10 @@ coherence between the two as much as reasonably possible.
 The one capability that method key paths method references possess that unbound methods do not is they may appear at the
 end of a longer chain involving properties, subscripts, and optional chaining / unwrapping:
 
-    ```swift
-    URL.baseURL?.pathComponents[1].reversed   // compile error: no chains allowed here, only one member deep
-    \URL.baseURL?.pathComponents[1].reversed  // OK!
-    ```
+```swift
+URL.baseURL?.pathComponents[1].reversed   // compile error: no chains allowed here, only one member deep
+\URL.baseURL?.pathComponents[1].reversed  // OK!
+```
 
 Note that because (1) methods in key paths return functions and (2) functions themselves have neither members nor
 subscripts, methods can only appear as the last element in a key path. This could change if a future proposal for
