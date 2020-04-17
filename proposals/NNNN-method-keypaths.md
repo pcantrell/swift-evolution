@@ -1,4 +1,4 @@
-# Allow Key Paths to Refer to Unapplied Methods
+# Allow Key Paths to Refer to Unapplied Instance Methods
 
 * Proposal: [SE-NNNN](NNNN-method-keypaths.md)
 * Authors: [Paul Cantrell](https://github.com/pcantrell), [Jeremy Saklad](https://github.com/Saklad5), [Filip Sakel](https://github.com/filip-sakel)
@@ -109,13 +109,26 @@ However, relying on unbound method references to fill in the gap in key paths le
     make fully robust proxies possible in Swift, it would extend the proxying that is possible.
 
 - **Idioms that rely on contextual type**: When the contextual type is either `KeyPath<Root,_>` or `(Root) -> _`, we can
-    omit `Root` from a key path literal. For example, given `var names: [String]`, instead of writing
-    `names.map(\String.count)`, we can simply write `names.map(\.count)`.
+    omit `Root` from a key path literal. For example:
+
+    ```swift
+    var names: [String]
+
+    names.map(\String.count)  // OK
+    names.map(\.count)        // Also OK: compiler infers String, like magic!
+    ```
 
     Unbound method references do not have this feature. Using `.someMember` in a context that could accept an unbound
     method will cause Swift to look for `.someMember` on the corresponding _function_ type — and since function types
-    have no members, this will fail. The magic of key path is that, given `\.someMember`, contextual inference searches
-    for `someMember` on the `Root` type of the key path instead of on `KeyPath` itself.
+    have no members, this will fail:
+
+    ```swift
+    names.map(String.reversed)  // OK
+    names.map(.reversed)        // error: type '(String) throws -> _' has no member 'reversed'
+    ```
+
+    The magic of the key path is that, given `\.someMember`, Swift searches for `someMember` on the key path’s `Root`
+    instead of on the type `KeyPath` itself.
 
     There are some idioms where unbound methods could be useful, but are slightly too awkward without this particular
     contextual type convenience. For example, as we will demonstrate below, method key paths could help mitigate the
