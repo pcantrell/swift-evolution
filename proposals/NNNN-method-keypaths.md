@@ -36,7 +36,7 @@ Swift-evolution thread: [Why can’t key paths refer to instance methods?](https
 For example, `\String.count` refers to “the `count` property of `String`s in general,” without referencing or being
 attached to any _particular_ `String` value.
 
-In many cases, `foo.m` is thus equivalent to `foo[key path: \.m]`:
+In many cases, `foo.___` is thus equivalent to `foo[key path: \.___]`:
 
 ```swift
 let exampleURL = URL(string: "https://swift.org/contributing")!
@@ -276,6 +276,8 @@ for proposals of their own, but pose design questions best served by separate di
 on these topics will consider unbound methods and key paths together as a unit, and attempt to maintain coherence
 between them as much as reasonably possible.
 
+---
+
 The one capability that method key paths method references possess that unbound methods do not is they may appear at the
 end of a longer chain involving properties, subscripts, and optional chaining / unwrapping:
 
@@ -288,11 +290,45 @@ Note that because (1) methods in key paths return functions and (2) functions th
 subscripts, methods can only appear as the last element in a key path. This could change if a future proposal for
 example allowed embedding of method arguments in a key path, or somehow allowed function types to conform to protocols.
 
+---
+
+Since unbound methods are never properties, and key paths are currently never methods, this proposal introduces a
+conflict when a method and a property have the same name, e.g. `Array.first` and `Array.first(where:)`. In this case, a
+bare reference with no argument names always refers to the property, and argument names are necessary to refer to the
+method:
+
+```swift
+\[Int].first          // keypath to property
+\[Int].first(where:)  // keypath to method
+```
+
+This parallels the existing behavior of bound but unapplied methods, which face the same problem and solve it in the
+same way:
+
+```swift
+var a: [Int]
+
+a.first          // property
+a.first(where:)  // unapplied method
+```
+
+This rule guarantees that it is always possible to reference both the property and the methods via key paths, since it
+is a compile error to declare a no-args method with the same name as a property:
+
+```swift
+struct S {
+    var x: Int
+    func x(_: Int) { … }   // allowed
+    func x() { … }         // compiler error
+}
+```
+
 
 ## Source compatibility
 
 This is a pure additive proposal: it only concerns key paths that end with method references, which currently do not
-compile at all.
+compile at all. In the case where a funciton and a property have the same same, any existing key path that compiles
+today will continue to refer to the property.
 
 
 ## Effect on ABI stability
