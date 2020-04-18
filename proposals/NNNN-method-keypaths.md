@@ -234,7 +234,7 @@ However, it is still prohibitively verbose when the wrong but tantalizing `self.
 Swift’s original designers noted in their decision to use `let` instead of `const`, developers will be prone to reach
 for the wrong thing if it takes fewer keystrokes!
 
-(Curiously, `Self.handleChange` currently does not work in this context — and if it did, the visual difference between
+(Curiously, `Self.handleChange` currently does not work in this context — and if it did, the visual difference between
 `self.handleChange` (wrong) and `Self.handleChange` (correct) would be just a bit too insidiously close for comfort.)
 
 Method key paths provide a more elegant alternative:
@@ -252,7 +252,7 @@ func addObserver<T: AnyObject>(owner: T, action: KeyPath<T, ResourceObserverClos
 
 When a key path literal omits the type name, Swift uses the key path’s _root_ type as the contextual type instead of the
 key path itself. In this case, that means the key path literal `\.handleChange` looks for a `handleChange` method on
-`T`, and thus needs no type prefix. This feature — unique to key paths — is what makes this idiom work.
+`T`, and thus needs no type prefix. This feature — unique to key paths — is what makes this idiom work.
 
 This idiom could become commonplace for APIs that require a method reference to be weakly bound. (It could even
 generalize to a callable `WeakUnappliedMethod` type, given some additional language work to support more finely typed
@@ -341,7 +341,7 @@ just as with unbound methods:
     however, it evaluates to a _bound but unapplied_ method of type `(DispatchQoS.QoSClass) -> DispatchQueue`. There is
     no way in Swift today to specify an _unbound_ class function reference that means “the class member `global(qos:)`
     of some _arbitrary subclass_ of `DispatchQueue`.” Such an unbound would require a caller to first specify which
-    subclass of `DispatchQueue` it wants — remember this is a class method, so subclasses can override it! — and then
+    subclass of `DispatchQueue` it wants — remember this is a class method, so subclasses can override it! — and then
     specify the QoS parameter; it would have the type `(DispatchQueue.Type) -> (DispatchQoS.QoSClass) -> DispatchQueue`.
 
     Because the parallel unbound method construct does not exist in Swift today, key paths would not support it either
@@ -350,8 +350,8 @@ just as with unbound methods:
 Again, **all of the above abilities and limitations** follow from our constraint that method key paths mirror existing
 behavior; none of the above is a new design decision unique to this proposal.
 
-These last three limitations in the list above — no partial application of arguments, no mutating methods, no type
-methods — are all ripe for proposals of their own, but pose design questions best served by separate discusions (see
+These last three limitations in the list above — no partial application of arguments, no mutating methods, no type
+methods — are all ripe for proposals of their own, but pose design questions best served by separate discusions (see
 Future Directions below), and are **out of scope for this proposal**.
 
 Any future proposals on topics such as these should consider both unbound methods and key paths, and attempt to maintain
