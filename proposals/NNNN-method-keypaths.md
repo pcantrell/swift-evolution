@@ -265,7 +265,7 @@ generalize to a callable `WeakUnappliedMethod` type, given some additional langu
 In general, for a type `T`and a method `m`, if and only if `T.m` evaluates to an unbound method of type
 `(T) -> (A) -> B`, then:
 
-- `\T.m` will evaluate to a key path of type `KeyPath<T, (A) -> B>`, and
+- `\T.m` will evaluate to a read-only key path of type `KeyPath<T, (A) -> B>`, and
 - given `var x: T`, the expression `x[keyPath: \.m]` will be equivalent to the expression `x.m`.
 
 Note that this phrasing aims to extend the current behavior of key paths according to existing precedent set by unbound
@@ -429,9 +429,76 @@ construct such values.
 
 ## Future directions
 
-### Method calls / partially applied methods
+Some popular feature ideas are out of this proposal’s scope. The discussion below explains why.
 
-**TODO**
+### Method calls in key paths
+
+This proposal deals only with _unapplied_ methods. There is also a strong case to make for supporting _applied_
+methods, i.e. allowing key paths to embed method calls.
+
+For example, one can transform a `URL` to another `URL` both by resolving relative paths (via `absoluteURL`) and by
+resolving symlinks (via `resolvingSymlinksInPath()`). Yet one of these is a property and the other is a method. It seems
+natural that key paths should support both:
+
+```swift
+\URL.absoluteURL                // This works...
+\URL.resolvingSymlinksInPath()  // ...so why shouldn’t this? But proposal above doesn’t cover it
+
+\URL.resolvingSymlinksInPath    // With proposal above, this gives a () -> URL function, not a URL
+```
+
+What about methods that take arguments? Key paths already support embedded _subscript_ arguments:
+
+```swift
+\URL.pathComponents[1]          // 1 is embedded in the key path
+\URL.pathComponents[1].count    // chain can continue after the subscript
+\URL.pathComponents[i + j * 3]  // subscript can contain expression, eagerly evaluated
+```
+
+This suggests that key paths ought to be able to embed _method_ arguments in a similar fashion:
+
+```swift
+\URL.appendingPathComponent("extra")  // KeyPath<URL, URL>
+```
+
+This natural line of reasoning runs into trouble when we realize that key path subscripts can only embed `Hashable`
+arguments. This is already a pain point for subscripts; for method calls, it would be untenable. The reasoning behind
+the `Hashable` restriction and underlying implementation concerns would complicate this otherwise straightforward
+proposal. We have thus chosen to leave method calls out of scope here.
+
+### Partially applied methods
+
+There has also been longstanding desire from the Swift community for _partial method application_, where a method
+reference provides some but not all arguments and evaluates to a closure that accepts the remaining ones:
+
+```swift
+// ⚠️ hypothetical syntax for illustrative purposes, not a proposal ⚠️
+url.appendingPathComponent(pathComponent: _, isDirectory: true)  // (String) -> URL
+```
+
+It would make sense for key paths to support this too:
+
+```swift
+\URL.appendingPathComponent(pathComponent: _, isDirectory: true) // KeyPath<URL, (String) -> URL>
+```
+
+This idea has surfaced on Swift Evolution
+[as long ago as 2016](https://forums.swift.org/t/proposal-automating-partial-application-via-wildcards/1284)
+and [as recently as April 2020](https://forums.swift.org/t/thoughts-regarding-the-potential-assignment-of-functions-to-labelled-identifiers/35471).
+It even made an appearance in the venerable
+[SE-0002](https://github.com/apple/swift-evolution/blob/master/proposals/0002-remove-currying.md#alternatives-considered).
+However, it quickly becomes entangled in
+[doubts about Swift’s method reference syntax](https://forums.swift.org/t/require-parameter-names-when-referencing-to-functions/27048)
+that raise thorny source compatibility questions.
+
+Whatever approach such a feature ultimately takes, its syntax should be uniform across method references and key paths.
+And whatever syntax compatibility challenges it raises for key paths already exist for method references. Thus while
+this document’s proposal to bringing key paths into alignment with method references does not _solve_ the problem,
+neither does it _change_ it.
+
+Given that, we think it best not to let this relatively simple proposal die on the rocks by opening the “partial method
+application” can of worms.
+
 
 ### Mutating methods
 
@@ -440,6 +507,8 @@ construct such values.
 ### Support for argument labels
 
 **TODO**: discuss named args in proxy example
+
+Relevant: https://forums.swift.org/t/thoughts-regarding-the-potential-assignment-of-functions-to-labelled-identifiers/35471
 
 
 ## Alternatives considered
