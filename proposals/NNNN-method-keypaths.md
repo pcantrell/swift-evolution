@@ -164,9 +164,11 @@ exampleURL           .encode(to:)                 // Unapplied method with named
 exampleURL[keyPath: \.encode(to:)]                // ✅ …works as a key path!
 ```
 
-Adding this feature opens up possibilties both pleasant and promising:
+Adding this feature opens up possibilties both pleasant and promising.
 
-### Chains that mix properties and methods
+### Use cases
+
+#### Chains that mix properties and methods
 
 We now have a way of referencing a member chain that includes both properties _and_ methods; the key path
 `\URL.absoluteString.reversed` now compiles.
@@ -188,11 +190,11 @@ stagesAndEntries.prefix(upTo: index)
 
 (Thanks, [SE-0249](https://github.com/apple/swift-evolution/blob/master/proposals/0249-key-path-literal-function-expressions.md)!)
 
-### Abstractions over properties and methods
+#### Abstractions over properties and methods
 
 **TODO**: key path member lookup example
 
-### Idioms that rely on contextual type
+#### Idioms that rely on contextual type
 
 **TODO**: Siesta key path-as-observer example
 
