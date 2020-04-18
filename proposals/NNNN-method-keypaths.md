@@ -25,7 +25,7 @@ This proposal adds the ability for key paths to reference instance methods, opti
 Note that these key paths do not provide argument values; they reference _unapplied_ methods, and the value they give is
 a function, not the the value that results from calling the method.
 
-Adding this capability not only removes an inconsistency in Swift, but solves pratical problems involving map/filter
+Adding this capability not only removes an inconsistency in Swift, but also solves pratical problems involving map/filter
 operations, proxying with key path member lookup, and passing weak method references that do not retain their receiver.
 
 Swift-evolution thread: [Why can’t key paths refer to instance methods?](https://forums.swift.org/t/why-can-t-key-paths-refer-to-instance-methods/35315)
@@ -196,7 +196,67 @@ stagesAndEntries.prefix(upTo: index)
 
 #### Idioms that rely on contextual type
 
-**TODO**: Siesta key path-as-observer example
+A common mistake [Siesta](https://bustoutsolutions.github.io/siesta/) users make is the following:
+
+```swift
+resource.addObserver(owner: self, action: self.handleChange)
+```
+
+Because of Siesta’s memory management policy (details not important here), this code creates a retain cycle. The correct
+way to write this snippet is to use a closure that weakly captures `self`:
+
+```swift
+resource.addObserver(owner: self) { [weak self] resource, event in
+    self?.handleChange(resource, event)
+}
+```
+
+The verbosity of this construction means developers almost never use it in practice. Siesta designs around it by
+encouraging developers to instead provide an object that implements a `ResourceObserver` protocol, and provides a
+shortcut overload to encourage that pattern. This design decision is a direct result of the current awkwardness of
+forming weakly bound method references.
+
+Others have also noted the need for weakly bound method references, and over the years there have been
+[multiple](https://lists.swift.org/pipermail/swift-evolution/Week-of-Mon-20170213/032478.html)
+[different](https://forums.swift.org/t/pitch-weak-method-storage-modifiers-aka-weak-references/12161)
+[pitches](https://forums.swift.org/t/pitch-introduction-of-weak-unowned-closures/6095) for simplifying the syntax for
+creating and/or enforcing them.
+
+A currently available alternative that sidesteps this problem is to provide an overload of the `addObserver` method that
+accepts an _unbound_ method reference, and assumes the receiver should be the object passed as `owner`:
+
+```swift
+resource.addObserver(owner: self, action: CurrentViewController.handleChange)  // addObserver weakly references owner
+```
+
+This approach works, and has the advantage that is allows `addObserver` to control how it retains the method receiver.
+However, it is still prohibitively verbose when the wrong but tantalizing `self.handleChange` sits close at hand. As
+Swift’s original designers noted in their decision to use `let` instead of `const`, developers will be prone to reach
+for the wrong thing if it takes fewer keystrokes!
+
+(Curiously, `Self.handleChange` currently does not work in this context — and if it did, the visual difference between
+`self.handleChange` (wrong) and `Self.handleChange` (correct) would be just a bit too insidiously close for comfort.)
+
+Method key paths provide a more elegant alternative:
+
+```swift
+resource.addObserver(owner: self, action: \.handleChange)
+```
+
+Key paths let us omit the type name from `action` where unbound methods do not. How? The signature of this `addObserver`
+overload is as follows:
+
+```swift
+func addObserver<T: AnyObject>(owner: T, action: KeyPath<T, ResourceObserverClosure>)
+```
+
+When a key path literal omits the type name, Swift uses the key path’s _root_ type as the contextual type instead of the
+key path itself. In this case, that means the key path literal `\.handleChange` looks for a `handleChange` method on
+`T`, and thus needs no type prefix. This feature — unique to key paths — is what makes this idiom work.
+
+This idiom could become commonplace for APIs that require a method reference to be weakly bound. (It could even
+generalize to a callable `WeakUnappliedMethod` type, given some additional language work to support more finely typed
+`@dynamicCallable` and tuple splatting.)
 
 
 ## Detailed design
