@@ -23,7 +23,7 @@ This proposal adds the ability for key paths to reference instance methods, opti
 ```
 
 Note that these key paths do not provide argument values; they reference _unapplied_ methods, and the value they give is
-a function, not the the value that results from calling the method.
+a function, not the the value that results from calling the method. (See Future Directions section below.)
 
 Adding this capability not only removes an inconsistency in Swift, but also solves pratical problems involving map/filter
 operations, proxying with key path member lookup, and passing weak method references that do not retain their receiver.
@@ -231,8 +231,9 @@ resource.addObserver(owner: self, action: CurrentViewController.handleChange)  /
 
 This approach works, and has the advantage that is allows `addObserver` to control how it retains the method receiver.
 However, it is still prohibitively verbose when the wrong but tantalizing `self.handleChange` sits close at hand. As
-Swift’s original designers noted in their decision to use `let` instead of `const`, developers will be prone to reach
-for the wrong thing if it takes fewer keystrokes!
+[Chris Lattner noted](https://forums.swift.org/t/proposal-universal-dynamic-dispatch-for-method-calls/237/62) about
+Swift’s decision to use `let` instead of `const`, developers will be prone to reach for the wrong thing and then
+rationalize it if it takes fewer keystrokes!
 
 (Curiously, `Self.handleChange` currently does not work in this context — and if it did, the visual difference between
 `self.handleChange` (wrong) and `Self.handleChange` (correct) would be just a bit too insidiously close for comfort.)
