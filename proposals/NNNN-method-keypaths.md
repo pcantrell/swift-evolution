@@ -491,10 +491,10 @@ However, it quickly becomes entangled in
 [doubts about Swift’s method reference syntax](https://forums.swift.org/t/require-parameter-names-when-referencing-to-functions/27048)
 that raise thorny source compatibility questions.
 
-Whatever approach such a feature ultimately takes, its syntax should be uniform across method references and key paths.
-And whatever syntax compatibility challenges it raises for key paths already exist for method references. Thus while
-this document’s proposal to bringing key paths into alignment with method references does not _solve_ the problem,
-neither does it _change_ it.
+Whatever approach such a feature ultimately takes, the **syntax should be uniform across method references and key
+paths**. And whatever syntax compatibility challenges a solution raises for key paths already exist for method
+references. Thus while this document’s proposal to bringing key paths into alignment with method references does not
+_solve_ the problem, neither does it _change_ it.
 
 Given that, we think it best not to let this relatively simple proposal die on the rocks by opening the “partial method
 application” can of worms.
