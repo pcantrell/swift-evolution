@@ -1,4 +1,4 @@
-# Allow Key Paths to Refer to Unapplied Instance Methods
+# Allow key paths to reference unapplied instance methods
 
 * Proposal: [SE-NNNN](NNNN-method-keypaths.md)
 * Authors: [Paul Cantrell](https://github.com/pcantrell), [Jeremy Saklad](https://github.com/Saklad5), [Filip Sakel](https://github.com/filip-sakel)
@@ -23,7 +23,7 @@ This proposal adds the ability for key paths to reference instance methods, opti
 ```
 
 Note that these key paths do not provide argument values; they reference _unapplied_ methods, and the value they give is
-a function, not the the value that results from calling the method. (See Future Directions section below.)
+a function, not the the value that results from calling the method. (See [Future Directions](#future-directions).)
 
 Adding this capability not only removes an inconsistency in Swift, but also solves pratical problems involving map/filter
 operations, proxying with key path member lookup, and passing weak method references that do not retain their receiver.
@@ -212,7 +212,7 @@ resource.addObserver(owner: self) { [weak self] resource, event in
 ```
 
 The verbosity of this construction means developers almost never use it in practice. Siesta designs around it by
-encouraging developers to instead provide an object that implements a `ResourceObserver` protocol, and provides a
+encouraging developers to instead provide an object that implements a `ResourceObserver` protocol, and it provides a
 shortcut overload to encourage that pattern. This design decision is a direct result of the current awkwardness of
 forming weakly bound method references.
 
@@ -298,8 +298,8 @@ just as with unbound methods:
     \S.f as KeyPath<S, (Int) -> Void>  // OK
     ```
 
-- Method key paths cannot reference methods requiring a generic type or provided by a conditional conformance except when
-    the reference is unambiguous:
+- Key paths cannot reference methods rooted in a generic type or provided by a conditional conformance unless the root
+    type is unambiguous:
 
     ```swift
     \Array.joined            // OK because joined is on an extension constrained to Element == String
@@ -319,7 +319,7 @@ just as with unbound methods:
     ```
 
 - In contrast to subscripts, whose arguments may be embedded in key paths, argument values / partial method application
-    are _not_ allowed in this version of the proposal:
+    are _not_ allowed in this version of the proposal (see [Future Directions](#future-directions)):
 
     ```swift
     \Array.joined(separator: "\n")  // syntax error
@@ -353,7 +353,7 @@ behavior; none of the above is a new design decision unique to this proposal.
 
 These last three limitations in the list above — no partial application of arguments, no mutating methods, no type
 methods — are all ripe for proposals of their own, but pose design questions best served by separate discusions (see
-Future Directions below), and are **out of scope for this proposal**.
+[Future Directions](#future-directions)), and are **out of scope for this proposal**.
 
 Any future proposals on topics such as these should consider both unbound methods and key paths, and attempt to maintain
 coherence between the two as much as reasonably possible.
@@ -429,7 +429,15 @@ construct such values.
 
 ## Future directions
 
+### Method calls / partially applied methods
+
+**TODO**
+
+### Mutating methods
+
 **TODO**: discuss how mutating methods might play out so we know we're not painting ourselves into a corner
+
+### Support for argument labels
 
 **TODO**: discuss named args in proxy example
 
