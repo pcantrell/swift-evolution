@@ -226,21 +226,13 @@ This proposal is thus not a complete solution for dynamic proxies. It does, howe
 language.
 
 Having a uniform way to refer to methods and properties can also help produce more natural and readable code. For
-example, with a few additional `map` methods in an extension:
+example, with a few additional `map` methods:
 
 ```swift
 extension Array {
-    func map<U>(_ transformation: @escaping (Element) -> () -> U) -> () -> [U] {
-        return {
-            self.map { elem in transformation(elem)() }
-        }
-    }
-
-    func map<T,U>(_ transformation: @escaping (Element) -> (T) -> U) -> (T) -> [U] {
-        return { (arg: T) in
-            self.map { elem in transformation(elem)(arg) }
-        }
-    }
+    func map<U>(_ transform: @escaping (Element) -> () -> U) -> () -> [U] { … }
+    func map<T,U>(_ transform: @escaping (Element) -> (T) -> U) -> (T) -> [U] { … }
+    // etc
 }
 ```
 
