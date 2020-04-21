@@ -218,12 +218,44 @@ wrapped methods:
 var hasher: Hasher = …
 ```swift
 let wrapper = StringWrapper(string: "myString")
-"swift".hash(into: &hasher)
-wrapper.hash(&hasher)       // no into: label
+"swift".hash(into: &hasher)  // String method has label
+wrapper.hash(&hasher)        // Wrapper method has no label
 ```
 
 This proposal is thus not a complete solution for dynamic proxies. It does, however, advance the state of the art in the
 language.
+
+Having a uniform way to refer to methods and properties can also help produce more natural and readable code. For
+example, with a few additional `map` methods in an extension:
+
+```swift
+extension Array {
+    func map<U>(_ transformation: @escaping (Element) -> () -> U) -> () -> [U] {
+        return {
+            self.map { elem in transformation(elem)() }
+        }
+    }
+
+    func map<T,U>(_ transformation: @escaping (Element) -> (T) -> U) -> (T) -> [U] {
+        return { (arg: T) in
+            self.map { elem in transformation(elem)(arg) }
+        }
+    }
+}
+```
+
+…we can write fluent map/filter chains that traverse both properties and methods:
+
+
+```swift
+let myArray: [URL] = …
+
+myArray
+    .map(\.resolvingSymlinksInPath)()
+    .filter(\.isFileURL)
+    .map(\.path)
+    .map(\.dropFirst)(3)
+```
 
 #### Idioms that rely on contextual type
 
@@ -628,9 +660,9 @@ This would prevent wrappers from exposing label-stripped methods:
 ```swift
 let wrapper: SomeStringWrapper = ...
 
-wrapper.hash(&value) // ❌ Don't allow this until language supports `into:` label
-
-wrapper.dropFirst()  // ❌ Also wouldn’t be allowed
+aString.hash(into: &value)  // This is how the call is supposed to look, so...
+wrapper.hash(&value)        // ❌ we could disallow this until language supports `into:` label
+wrapper.dropFirst()         // ❌ which would also disallow this
 ```
 
 The argument in favor of this is it would be best not to expose methods stripped of labels now if we expect the labels
@@ -639,5 +671,3 @@ to return in the future, since their re-addition _might_ be source-breaking.
 However, dynamic member lookup of methods is a popular motivation for this proposal. The argument label problem already
 exists for unbound methods, so any attempt to solve it could already lead to source-breaking changes even without this
 proposal. Such an attempt could avoid (or handle) that breakage in a uniform way across unbound methods and key paths.
-
-**TODO:** _Other reasons?_
