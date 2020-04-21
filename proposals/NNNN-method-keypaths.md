@@ -230,9 +230,9 @@ resource.addObserver(owner: self, action: CurrentViewController.handleChange)  /
 ```
 
 This approach works, and has the advantage that is allows `addObserver` to control how it retains the method receiver.
-However, it is still prohibitively verbose when the wrong but tantalizing `self.handleChange` sits close at hand. As
-[Chris Lattner noted](https://forums.swift.org/t/proposal-universal-dynamic-dispatch-for-method-calls/237/62) about
-Swift’s decision to use `let` instead of `const`, developers will be prone to reach for the wrong thing and then
+However, it is still prohibitively verbose — especially when the wrong but tantalizing `self.handleChange` sits close at
+hand. As [Chris Lattner noted](https://forums.swift.org/t/proposal-universal-dynamic-dispatch-for-method-calls/237/62)
+about Swift’s decision to use `let` instead of `const`, developers will be prone to reach for the wrong thing and then
 rationalize it if it takes fewer keystrokes!
 
 (Curiously, `Self.handleChange` currently does not work in this context — and if it did, the visual difference between
@@ -395,7 +395,7 @@ a.first(where:)  // unapplied method
 ```
 
 This rule guarantees that it is always possible to reference both the property and the methods via key paths, since it
-is a compile error to declare a no-args method with the same name as a property:
+is a compile-time error to declare a no-args method with the same name as a property:
 
 ```swift
 struct S {
@@ -415,9 +415,9 @@ today will continue to refer to the property.
 
 ## Effect on ABI stability
 
-**TODO**: I don't think this affects the ABI, since the generated types (`KeyPath<Base,m->m>`) are representible in
+**TODO**: _I don't think this affects the ABI, since the generated types (`KeyPath<Base,(T)->U>`) are representible in
 Swift’s current type system even if the key path syntax doesn't support them. Are there ABI implications beyond that?
-I’m not even sure what ABI impacts look like.
+I’m not even sure what ABI impacts look like. -PPC_
 
 
 ## Effect on API resilience
@@ -498,7 +498,6 @@ _solve_ the problem, neither does it _change_ it.
 
 Given that, we think it best not to let this relatively simple proposal die on the rocks by opening the “partial method
 application” can of worms.
-
 
 ### Mutating methods
 
