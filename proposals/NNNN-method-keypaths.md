@@ -192,7 +192,38 @@ stagesAndEntries.prefix(upTo: index)
 
 #### Abstractions over properties and methods
 
-**TODO**: key path member lookup example
+Having a single abstraction that can reference both properties and methods opens new possibilities. For example, this
+proposal combined with dynamic member lookup is powerful. It allows us to create boilerplate-free wrapper types that
+support method calls:
+
+```swift
+@dynamicMemberLookup
+struct StringWrapper {
+    var string: String
+
+    subscript<Value>(dynamicMember member: KeyPath<String, Value>) -> Value {
+        string[keyPath: member]  // possibly wrapped with additional processing
+    }
+}
+
+let wrapper: StringWrapper = …
+
+wrapper.dropFirst()  // Now valid code; returns value of type `Substring`.
+```
+
+Note that, per [SE-0111](https://github.com/apple/swift-evolution/blob/master/proposals/0111-remove-arg-label-type-significance.md),
+Swift values of function type do not allow argument labels. This means the code above strips argument labels from the
+wrapped methods:
+
+var hasher: Hasher = …
+```swift
+let wrapper = StringWrapper(string: "myString")
+"swift".hash(into: &hasher)
+wrapper.hash(&hasher)       // no into: label
+```
+
+This proposal is thus not a complete solution for dynamic proxies. It does, however, advance the state of the art in the
+language.
 
 #### Idioms that rely on contextual type
 
@@ -505,11 +536,60 @@ application” can of worms.
 
 ### Support for argument labels
 
-**TODO**: discuss named args in proxy example
+Accepting this proposal will create pressure to solve the argument label problem in the
+[wrapper type example above](#abstractions-over-properties-and-methods).
 
-Relevant: https://forums.swift.org/t/thoughts-regarding-the-potential-assignment-of-functions-to-labelled-identifiers/35471
+One possibility would be loosening SE-0111 to make argument labels optional:
+
+```swift
+struct Foo {
+    func bar(a: A) { ... }
+ }
+
+struct FooWrapper { ... }
+let wrappedFoo: FooWrapper = ...
+
+wrappedFoo.bar(a: A())
+// this would be equivalent to:
+wrappedFoo.bar(a:)(A())
+```
+
+Alternatively, a
+[recent pitch](https://forums.swift.org/t/include-argument-labels-in-identifiers/35367/23) suggested that argument
+labels be added to the identifier instead of the function type. It might be possible to extend this to identifiers
+dynamically resolved by key paths.
+
+However, given that SE-0111 and its implications have generated copious discussion without resolution
+([1](https://forums.swift.org/t/review-se-0111-remove-type-system-significance-of-function-argument-labels/3209),
+[2](https://forums.swift.org/t/update-commentary-se-0111-remove-type-system-significance-of-function-argument-labels/3391),
+[3](https://forums.swift.org/t/accepted-se-0111-remove-type-system-significance-of-function-argument-labels/3306/17),
+[4](https://forums.swift.org/t/se-0111-related-question/3813),
+[5](https://forums.swift.org/t/se-0111-and-curried-argument-labels-unintended-consequences/4179)),
+trying to solve the argument label problem as part of this proposal would likely doom it — and its benefits — to
+purgatory.
 
 
 ## Alternatives considered
 
 **TODO**: what are alternatives? maybe expanding unbound methods to properties?
+
+### Prohibit method key paths in dynamic member lookup
+
+This would prevent wrappers from exposing label-stripped methods:
+
+```swift
+let wrapper: SomeStringWrapper = ...
+
+wrapper.hash(&value) // ❌ Don't allow this until language supports `into:` label
+
+wrapper.dropFirst()  // ❌ Also wouldn’t be allowed
+```
+
+The argument in favor of this is it would be best not to expose methods stripped of labels now if we expect the labels
+to return in the future, since their re-addition _might_ be source-breaking.
+
+However, dynamic member lookup of methods is a popular motivation for this proposal. The argument label problem already
+exists for unbound methods, so any attempt to solve it could already lead to source-breaking changes even without this
+proposal. Such an attempt could avoid (or handle) that breakage in a uniform way across unbound methods and key paths.
+
+**TODO:** _Other reasons?_
