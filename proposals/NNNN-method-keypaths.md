@@ -249,6 +249,8 @@ myArray
     .map(\.dropFirst)(3)
 ```
 
+Creative possibiltiies abound.
+
 #### Idioms that rely on contextual type
 
 A common mistake [Siesta](https://bustoutsolutions.github.io/siesta/) users make is the following:
