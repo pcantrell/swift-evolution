@@ -468,12 +468,13 @@ This proposal deals only with _unapplied_ methods. There is also a strong case t
 methods, i.e. allowing key paths to embed method calls.
 
 For example, one can transform a `URL` to another `URL` both by resolving relative paths (via `absoluteURL`) and by
-resolving symlinks (via `resolvingSymlinksInPath()`). Yet one of these is a property and the other is a method. It seems
-natural that key paths should support both:
+resolving symlinks (via `resolvingSymlinksInPath()`). Yet one of these is a property and the other is a method, so this
+proposal only supports making a key path that returns the value of the former. It seems natural that key paths should
+support both:
 
 ```swift
 \URL.absoluteURL                // This works...
-\URL.resolvingSymlinksInPath()  // ...so why shouldn’t this? But proposal above doesn’t cover it
+\URL.resolvingSymlinksInPath()  // ...so why shouldn’t this? But this proposal doesn’t cover it
 
 \URL.resolvingSymlinksInPath    // With proposal above, this gives a () -> URL function, not a URL
 ```
@@ -532,7 +533,44 @@ application” can of worms.
 
 ### Mutating methods
 
-**TODO**: discuss how mutating methods might play out so we know we're not painting ourselves into a corner
+This proposal does not support mutating methods, because it is not clear how a caller should access the result of the
+mutation. It seems natural that this code should work:
+
+```swift
+var primes = [2, 3, 5]
+primes[keyPath: \.append](7)
+```
+
+…but what, then, should this do?
+
+```swift
+var primes = [2, 3, 5]
+let appender = primes[keyPath: \.append]
+appender(7)  // Is primes now mutated? Does appender keep a hidden pointer to
+             // a stack-allocated value? What if appender escapes local scope?
+```
+
+Key paths for mutating methods might induce an `inout` param for self:
+
+```swift
+let appender: (inout Array<Int>, Int) -> Void = \Array.append
+appender(primes, 7)
+```
+
+…but that idea only makes sense when using key path literals as a convenience to form closures; it quickly breaks down
+when using actual key path values as subscripts:
+
+```swift
+var mersennes = [0, 1, 3]
+primes[keyPath: \.append](mersennes, 7)  // Which is mutated: mersennes or primes?
+```
+
+This line of reasoning suggests that mutating methods are best left for a follow-up proposal:
+
+- If they are in fact limited to key path _literals_ converted to closures, then they are both outside the scope of this
+  proposal and not in conflict with it.
+- If we seek a broader solution, it would need to be consistent with unbound methods as well, and thus (as in the
+  previous section) this proposal is only uniformly respecting an existing problem, not introducing a new one.
 
 ### Support for argument labels
 
