@@ -1,7 +1,7 @@
 # Allow key paths to reference unapplied instance methods
 
 * Proposal: [SE-NNNN](NNNN-method-keypaths.md)
-* Authors: [Paul Cantrell](https://github.com/pcantrell), [Jeremy Saklad](https://github.com/Saklad5), [Filip Sakel](https://github.com/filip-sakel)
+* Authors: [Paul Cantrell](https://github.com/pcantrell), [Filip Sakel](https://github.com/filip-sakel), [Jeremy Saklad](https://github.com/Saklad5)
 * Review Manager: TBD
 * Status: **Awaiting implementation**
 
@@ -571,7 +571,17 @@ purgatory.
 
 ## Alternatives considered
 
-**TODO**: what are alternatives? maybe expanding unbound methods to properties?
+### Focus on unbound methods instead of key paths
+
+This proposal extends the domain of key paths. We could instead extend the domain of unbound methods:
+
+```swift
+String.count  // yields a (String) -> Int function
+```
+
+This however does not provide the [contextual type inference benefits of key paths](#idioms-that-rely-on-contextual-type),
+departs from `@dynamicMemberLookup`’s current focus on key paths, and would create confusing error messages for
+developers who confuse instance properties with type properties.
 
 ### Prohibit method key paths in dynamic member lookup
 
