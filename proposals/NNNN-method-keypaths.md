@@ -215,8 +215,8 @@ Note that, per [SE-0111](https://github.com/apple/swift-evolution/blob/master/pr
 Swift values of function type do not allow argument labels. This means the code above strips argument labels from the
 wrapped methods:
 
-var hasher: Hasher = …
 ```swift
+var hasher: Hasher = …
 let wrapper = StringWrapper(string: "myString")
 "swift".hash(into: &hasher)  // String method has label
 wrapper.hash(&hasher)        // Wrapper method has no label
