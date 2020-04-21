@@ -249,7 +249,7 @@ myArray
     .map(\.dropFirst)(3)
 ```
 
-Creative possibiltiies abound.
+Creative possibilities abound.
 
 #### Idioms that rely on contextual type
 
