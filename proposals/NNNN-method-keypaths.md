@@ -225,8 +225,8 @@ wrapper.hash(&hasher)        // Wrapper method has no label
 This proposal is thus not a complete solution for dynamic proxies. It does, however, advance the state of the art in the
 language.
 
-Having a uniform way to refer to methods and properties can also help produce more natural and readable code. For
-example, with a few additional `map` methods:
+Having a uniform way to refer to methods and properties can also help produce more natural and readable code. As an
+example of just how flexible unbound methods are, with a few additional `map` overloads:
 
 ```swift
 extension Array {
@@ -236,7 +236,8 @@ extension Array {
 }
 ```
 
-…we can write fluent map/filter chains that traverse both properties and methods:
+…we can approximate the benefit of having _applied_ methods in key paths as well, and write fluent map/filter chains
+…that traverse both properties and methods:
 
 
 ```swift
@@ -388,19 +389,21 @@ just as with unbound methods:
     \Array.append  // compile error (how would we reference the mutated collection?)
     ```
 
-- Method key paths may not reference type methods (i.e. static or class methods) or operators:
+- Method key paths may not reference type methods (i.e. static methods, class methods, initializers) or operators:
 
     ```swift
     \DispatchQueue.global(qos:)  // No
-    \Array.+                     // Also no
+    \URL.init(string:)           // Also no
+    \Array.+                     // Sorry, no
     ```
 
     This one deserves a little explanation. The expression `DispatchQueue.global(qos:)` _does_ work in Swift today;
     however, it evaluates to a _bound but unapplied_ method of type `(DispatchQoS.QoSClass) -> DispatchQueue`. There is
     no way in Swift today to specify an _unbound_ class function reference that means “the class member `global(qos:)`
-    of some _arbitrary subclass_ of `DispatchQueue`.” Such an unbound would require a caller to first specify which
-    subclass of `DispatchQueue` it wants — remember this is a class method, so subclasses can override it! — and then
-    specify the QoS parameter; it would have the type `(DispatchQueue.Type) -> (DispatchQoS.QoSClass) -> DispatchQueue`.
+    of some _arbitrary subclass_ of `DispatchQueue`.” Such an unbound method would require a caller to first specify
+    which subclass of `DispatchQueue` it wants — remember this is a class method, so subclasses can override it! — and
+    then specify the QoS parameter; it would have the type `(DispatchQueue.Type) -> (DispatchQoS.QoSClass) ->
+    DispatchQueue`.
 
     Because the parallel unbound method construct does not exist in Swift today, key paths would not support it either
     (yet) under this proposal.
@@ -465,7 +468,7 @@ struct S {
 
 ## Source compatibility
 
-This is a pure additive proposal: it only concerns key paths that end with method references, which currently do not
+This is a purely additive proposal: it only concerns key paths that end with method references, which currently do not
 compile at all. In the case where a funciton and a property have the same same, any existing key path that compiles
 today will continue to refer to the property.
 
@@ -603,7 +606,8 @@ This line of reasoning suggests that mutating methods are best left for a follow
 Accepting this proposal will create pressure to solve the argument label problem in the
 [wrapper type example above](#abstractions-over-properties-and-methods).
 
-One possibility would be loosening SE-0111 to make argument labels optional:
+One possibility would be loosening [SE-0111](https://github.com/apple/swift-evolution/blob/master/proposals/0111-remove-arg-label-type-significance.md)
+to make argument labels optional:
 
 ```swift
 struct Foo {
@@ -664,4 +668,5 @@ to return in the future, since their re-addition _might_ be source-breaking.
 
 However, dynamic member lookup of methods is a popular motivation for this proposal. The argument label problem already
 exists for unbound methods, so any attempt to solve it could already lead to source-breaking changes even without this
-proposal. Such an attempt could avoid (or handle) that breakage in a uniform way across unbound methods and key paths.
+proposal. Such an attempt at a solution could address that breakage in a uniform way across unbound methods and key
+paths even if this proposal were accepted.
