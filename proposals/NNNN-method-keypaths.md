@@ -23,9 +23,9 @@ This proposal adds the ability for key paths to reference instance methods, opti
 ```
 
 Note that these key paths do not provide argument values; they reference _unapplied_ methods, and the value they give is
-a function, not the the value that results from calling the method. (See [Future Directions](#future-directions).)
+a function, not the value that results from calling the method. (See [Future Directions](#future-directions).)
 
-Adding this capability not only removes an inconsistency in Swift, but also solves pratical problems involving map/filter
+Adding this capability not only removes an inconsistency in Swift, but also solves practical problems involving map/filter
 operations, proxying with key path member lookup, and passing weak method references that do not retain their receiver.
 
 Swift-evolution thread: [Why can’t key paths refer to instance methods?](https://forums.swift.org/t/why-can-t-key-paths-refer-to-instance-methods/35315)
@@ -178,7 +178,7 @@ code](https://github.com/bustoutsolutions/siesta/blob/3b5b83447a83bb70237537a93e
 
 ```swift
 stagesAndEntries.prefix(upTo: index)
-    .compactMap { $0.cacheEntry?.remove })  // gather removal actions to perform later
+    .compactMap { $0.cacheEntry?.remove }  // gather removal actions to perform later
 ```
 
 With this proposal, we could simplify the call above to:
