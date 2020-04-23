@@ -164,7 +164,7 @@ exampleURL           .encode(to:)                 // Unapplied method with named
 exampleURL[keyPath: \.encode(to:)]                // ✅ …works as a key path!
 ```
 
-Adding this feature opens up possibilties both pleasant and promising.
+Adding this feature opens up possibilities both pleasant and promising.
 
 ### Use cases
 
@@ -412,7 +412,7 @@ Again, **all of the above abilities and limitations** follow from our constraint
 behavior; none of the above is a new design decision unique to this proposal.
 
 These last three limitations in the list above — no partial application of arguments, no mutating methods, no type
-methods — are all ripe for proposals of their own, but pose design questions best served by separate discusions (see
+methods — are all ripe for proposals of their own, but pose design questions best served by separate discussions (see
 [Future Directions](#future-directions)), and are **out of scope for this proposal**.
 
 Any future proposals on topics such as these should consider both unbound methods and key paths, and attempt to maintain
@@ -440,8 +440,8 @@ bare reference with no argument names always refers to the property, and argumen
 method:
 
 ```swift
-\[Int].first          // keypath to property
-\[Int].first(where:)  // keypath to method
+\[Int].first          // key path to property
+\[Int].first(where:)  // key path to method
 ```
 
 This parallels the existing behavior of bound but unapplied methods, which face the same problem and solve it in the
@@ -469,13 +469,13 @@ struct S {
 ## Source compatibility
 
 This is a purely additive proposal: it only concerns key paths that end with method references, which currently do not
-compile at all. In the case where a funciton and a property have the same same, any existing key path that compiles
+compile at all. In the case where a function and a property have the same same, any existing key path that compiles
 today will continue to refer to the property.
 
 
 ## Effect on ABI stability
 
-**TODO**: _I don't think this affects the ABI, since the generated types (`KeyPath<Base,(T)->U>`) are representible in
+**TODO**: _I don't think this affects the ABI, since the generated types (`KeyPath<Base,(T)->U>`) are representable in
 Swift’s current type system even if the key path syntax doesn't support them. Are there ABI implications beyond that?
 I’m not even sure what ABI impacts look like. -PPC_
 
